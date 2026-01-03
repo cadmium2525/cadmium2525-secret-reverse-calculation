@@ -498,8 +498,8 @@ function renderHistory() {
     rows.push({ type: 'header_split', label1: '秘伝名', label2: '星数' });
     ownedRowKeys.forEach(k => rows.push({ type: 'owned', key: k.key, name: k.name, star: k.star }));
 
-    let html = '<thead><tr><th>項目</th><th>星</th>';
-    historyData.forEach((_, i) => html += `<th>試行 ${i + 1}</th>`);
+    let html = '<thead><tr><th>項目</th><th>星数</th>';
+    historyData.forEach((_, i) => html += `<th>${i + 1}回目</th>`);
     html += '</tr></thead><tbody>';
 
     rows.forEach(row => {
@@ -508,7 +508,7 @@ function renderHistory() {
             return;
         }
         let label = '', starStr = '';
-        if (row.type === 'secret') { label = row.name; starStr = '★'.repeat(row.star); }
+        if (row.type === 'secret') { label = row.name; starStr = '★'.repeat(row.star) + '☆'.repeat(3 - row.star); }
         else if (row.type === 'owned') { label = row.name + "'"; starStr = '★'.repeat(row.star) + '☆'.repeat(3 - row.star); }
         else if (row.type.includes('header')) { label = row.label; starStr = ''; }
         else { label = row.label; starStr = row.unit || ''; }
