@@ -191,6 +191,9 @@ function initUI() {
     const resetBtn = document.getElementById('btn-reset-history');
     if (resetBtn) resetBtn.addEventListener('click', resetHistory);
 
+    const clearTargetBtn = document.getElementById('btn-clear-target');
+    if (clearTargetBtn) clearTargetBtn.addEventListener('click', clearTargetInputs);
+
     const copyBtn = document.getElementById('btn-copy-history');
     if (copyBtn) copyBtn.addEventListener('click', copyHistoryTSV);
 }
@@ -232,6 +235,22 @@ function resetHistory() {
     if (confirm('履歴をすべて削除しますか？')) {
         historyData = [];
         saveHistory();
+    }
+}
+function clearTargetInputs() {
+    if (confirm('目標ステータス・能力ptをクリアしますか？')) {
+        const ids = ['target-life', 'target-pow', 'target-int', 'target-ski', 'target-spd', 'target-def', 'target-pt'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        saveInputValues();
+    }
+}
+function resetFamilyData() {
+    if (confirm('全世代の所持秘伝を削除しますか？')) {
+        FAMILY_MEMBERS.forEach(m => familyData[m] = []);
+        saveFamilyData();
     }
 }
 function saveInputValues() {
@@ -471,9 +490,11 @@ function renderHistory() {
 
     sortedDefNames.forEach(name => {
         [3, 2, 1].forEach(star => {
-            // Check if this exists in ANY history? 
-            // The user wants rows for all relevant secrets.
-            rows.push({ type: 'secret', name, star });
+            // Check if this exists in ANY history combo?
+            const isUsed = historyData.some(h => (h.combo || []).some(s => s.name === name && s.star === star));
+            if (isUsed) {
+                rows.push({ type: 'secret', name, star });
+            }
         });
     });
 
@@ -581,6 +602,25 @@ function importDefinitions(input) {
     };
     r.readAsText(file);
 }
+
+function exportHistoryData() { downloadJSON(JSON.stringify(historyData, null, 2), "history.json"); }
+function importHistoryData(input) {
+    const file = input.files[0]; if (!file) return;
+    const r = new FileReader();
+    r.onload = e => {
+        try {
+            const j = JSON.parse(e.target.result);
+            if (confirm("履歴をインポートしますか？（現在の履歴は上書きされます）")) {
+                historyData = j;
+                saveHistory();
+                alert("完了");
+            }
+        } catch (err) { alert("エラー"); }
+        input.value = '';
+    };
+    r.readAsText(file);
+}
+
 function exportFamilyData() { downloadJSON(JSON.stringify(familyData, null, 2), "possessed.json"); }
 function importFamilyData(input) {
     const file = input.files[0]; if (!file) return;
@@ -594,6 +634,7 @@ function importFamilyData(input) {
     };
     r.readAsText(file);
 }
+
 function downloadJSON(content, fname) {
     const blob = new Blob([content], { type: "application/json" });
     const url = URL.createObjectURL(blob);

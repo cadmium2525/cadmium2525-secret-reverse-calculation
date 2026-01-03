@@ -41,7 +41,13 @@
             <!-- TAB: Calculation -->
             <section id="tab-calc" class="tab-content active">
                 <div class="card">
-                    <h2>目標ステータス設定</h2>
+                    <div class="header-with-action" style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2>目標ステータス設定</h2>
+                        <button class="secondary-btn small-btn" id="btn-clear-target">
+                            <span class="material-icons-round">backspace</span>
+                            クリア
+                        </button>
+                    </div>
                     <div class="form-grid target-stats-grid">
                         <div class="input-group">
                             <label>ライフ</label>
@@ -164,6 +170,10 @@
                 <div class="card" style="margin-top: 1rem;">
                     <h3>データ管理</h3>
                     <div class="history-controls">
+                        <button class="secondary-btn small-btn" onclick="resetFamilyData()">
+                            <span class="material-icons-round">delete_sweep</span>
+                            全世代の所持状況をクリア
+                        </button>
                         <button class="secondary-btn small-btn" onclick="exportFamilyData()">
                             <span class="material-icons-round">download</span>
                             所持状況をエクスポート
@@ -225,6 +235,15 @@
                             <span class="material-icons-round">delete_outline</span>
                             履歴を全削除
                         </button>
+                        <button class="secondary-btn small-btn" onclick="exportHistoryData()">
+                            <span class="material-icons-round">download</span>
+                            履歴をエクスポート
+                        </button>
+                        <button class="secondary-btn small-btn" onclick="document.getElementById('import-history-file').click()">
+                            <span class="material-icons-round">upload</span>
+                            履歴をインポート
+                        </button>
+                        <input type="file" id="import-history-file" accept=".json" style="display: none;" onchange="importHistoryData(this)">
                         <button class="primary-btn small-btn" id="btn-copy-history">
                             <span class="material-icons-round">content_copy</span>
                             結果をコピー (TSV)
