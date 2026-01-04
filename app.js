@@ -454,16 +454,29 @@ function removeSecretFromMember(member, index) {
 }
 
 // History
-function addToHistory(result, req, ownedSecrets) {
+// Helper to get symbol
+function getCompatibilitySymbol(ratio) {
+    if (ratio >= 1.29) return '👑✨';
+    if (ratio >= 1.24) return '👑';
+    if (ratio >= 1.19) return '☆';
+    if (ratio >= 1.14) return '◎';
+    if (ratio >= 1.09) return '○';
+    if (ratio >= 1.04) return '△';
+    return '×';
+}
+
+function addToHistory(result, req, ownedSecrets, ratio) {
     const entry = {
         timestamp: new Date().toISOString(),
         combo: result.combo || [],
         actualStatSum: result.actualStatSum || 0,
-        ownedSnapshot: JSON.parse(JSON.stringify(ownedSecrets))
+        ownedSnapshot: JSON.parse(JSON.stringify(ownedSecrets)),
+        ratio: ratio || 1.0
     };
     historyData.push(entry);
     saveHistory();
 }
+
 function renderHistory() {
     const table = document.getElementById('history-table');
     const emptyMsg = document.getElementById('history-empty-msg');
@@ -518,6 +531,8 @@ function renderHistory() {
     rows.push({ type: 'header', label: '所持白秘伝一覧' });
     rows.push({ type: 'header_split', label1: '秘伝名', label2: '星数' });
     ownedRowKeys.forEach(k => rows.push({ type: 'owned', key: k.key, name: k.name, star: k.star }));
+    rows.push({ type: 'separator' });
+    rows.push({ type: 'compatibility', label: '相性' });
 
     let html = '<thead><tr><th>項目</th><th>星数</th>';
     historyData.forEach((_, i) => html += `<th>${i + 1}回目</th>`);
@@ -568,6 +583,8 @@ function renderHistory() {
                 }
             } else if (row.type === 'owned') {
                 val = os.filter(s => `${s.name}-${s.star}` === row.key).length || '';
+            } else if (row.type === 'compatibility') {
+                val = getCompatibilitySymbol(h.ratio || 1.0);
             }
             rowHtml += `<td>${val}</td>`;
         });
@@ -708,7 +725,7 @@ async function calculate() {
             document.getElementById('result-area').classList.remove('hidden');
             if (formatted.html) {
                 document.getElementById('result-html').innerHTML = formatted.html;
-                addToHistory(formatted, null, ownedFlat);
+                addToHistory(formatted, null, ownedFlat, target.ratio);
                 document.getElementById('result-text').textContent = '';
             } else {
                 document.getElementById('result-text').textContent = formatted.raw || "Result Error";
